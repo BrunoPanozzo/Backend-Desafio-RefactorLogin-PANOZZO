@@ -166,6 +166,13 @@ router.get('/login', userIsNotLoggedIn,  (_, res) => {
     })
 })
 
+router.get('/reset_password', userIsNotLoggedIn,  (_, res) => {
+    // sólo se puede acceder si NO está logueado
+    res.render('reset_password', {
+        title: 'Reset Password'
+    })
+})
+
 router.get('/register', userIsNotLoggedIn, (_, res) => {
     //sólo se puede acceder si NO está logueado
     res.render('register', {
