@@ -39,7 +39,6 @@ router.post('/login', async (req, res) => {
                 return res.status(401).json({ error: 'Password inválida!' })
             }
         }
-        console.log(user)
 
         req.session.user = { id: user._id.toString(), email: user.email, age: user.age, firstName: user.firstName, lastName: user.lastName, rol: user.rol }
 
