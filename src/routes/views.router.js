@@ -1,6 +1,6 @@
 const { Router } = require('express')
 const ProductManager = require('../dao/fsManagers/ProductManager')
-const productModel = require('../dao/models/product.model')
+// const productModel = require('../dao/models/product.model')
 const { userIsLoggedIn, userIsNotLoggedIn, userIsAdmin }= require('../middlewares/auth.middleware')
 
 const router = Router()
@@ -160,20 +160,21 @@ router.get('/', (req, res) => {
 
 
 router.get('/login', userIsNotLoggedIn,  (_, res) => {
-    // sólo se puede acceder si no está logueado
+    // sólo se puede acceder si NO está logueado
     res.render('login', {
         title: 'Login'
     })
 })
 
 router.get('/register', userIsNotLoggedIn, (_, res) => {
-    //sólo se puede acceder si no está logueado
+    //sólo se puede acceder si NO está logueado
     res.render('register', {
         title: 'Register'
     })
 })
 
 router.get('/profile', userIsLoggedIn,  (req, res) => {
+    //sólo se puede acceder SI está logueado
     let user = req.session.user 
     res.render('profile', {
         title: 'Mi perfil',

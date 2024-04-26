@@ -1,5 +1,3 @@
-//lado cliente, browser
-
 document.addEventListener("DOMContentLoaded", function () {
     const buttons = document.getElementsByClassName("btn-eliminarItem")
     // Convertir la coleccion a un array para que sea mas facil manipularla
@@ -12,12 +10,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 method: 'DELETE'
             })
                 .then(() => {
-                    console.log('borre ..');
                     fetch(`http://localhost:8080/realtimeproducts`, {
                         method: 'GET'
                     })
                 })
-                .catch(error => {                    
+                .catch(error => {
                     console.error('Error fetching data:', error);
                 });
         });
