@@ -1,9 +1,15 @@
 //definir los paquetes que se van a utilizar
 const express = require('express')
 const expressHandlebars = require("express-handlebars")
+
 const cookieParser = require('cookie-parser')
 const mongoose = require('mongoose')
+
 const { Server } = require('socket.io')
+
+//definir paquetes de passport
+const passport = require('passport')
+const initializeStrategy = require('./config/passport.config')
 
 //definir paquetes y config de mongo
 const { dbName, mongoUrl } = require('./dbConfig')
@@ -53,6 +59,11 @@ app.use('/carts', express.static(`${__dirname}/../public`));
 //configuro mi session en MongoDB
 app.use(cookieParser())
 app.use(sessionMiddleware)
+
+// inicializamos Passport
+initializeStrategy()
+app.use(passport.initialize())
+app.use(passport.session())
 
 //configurar los routers
 app.use('/api/products', productRouter)
