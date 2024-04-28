@@ -22,56 +22,18 @@ router.post('/login', passport.authenticate('login', { failureRedirect: '/api/se
     return res.redirect('/products')
 })
 
-
 router.get('/faillogin', (req, res) => {
     res.send({ status: 'error', message: 'Login erróneo.!' })
 })
 
-
-router.post('/reset_password', async (req, res) => {
-    const { email, newPassword } = req.body
-
-    try {
-        if (!email || !newPassword) {
-            return res.status(400).send('Credenciales inválidas!')
-        }
-
-        const user = await userModel.findOne({ email })
-        if (!user) {
-            return res.status(400).send('No se encontró el usuario!')
-        }
-
-        await userModel.updateOne({ email }, { $set: { password: hashPassword(newPassword) } })
-
-        res.redirect('/login')
-    }
-    catch (err) {
-        // console.log(err)
-        res.status(500).send('Error al resetear el password del usuario!')
-    }
+router.post('/reset_password', passport.authenticate('reset_password', { failureRedirect: '/api/sessions/failreset_password' }), async (req, res) => {
+    // console.log(req.user)
+    res.redirect('/login')
 })
 
-
-// router.post('/register', async (req, res) => {
-//     const { firstName, lastName, email, age, password, rol } = req.body
-
-//     try {
-//         await userModel.create({
-//             firstName,
-//             lastName,
-//             age: +age,
-//             email,
-//             password: hashPassword(password),
-//             rol
-//         })
-
-//         res.redirect('/login')
-//     }
-//     catch (err) {
-//         // console.log(err)
-//         res.status(500).send('Error al crear el usuario!')
-//     }
-// })
+router.get('/failreset_password', (req, res) => {
+    res.send({ status: 'error', message: 'No se pudo resetear la password!' })
+})
 
 // agregamos el middleware de passport para el register
 router.post('/register', passport.authenticate('register', { failureRedirect: '/api/sessions/failregister' }), async (req, res) => {

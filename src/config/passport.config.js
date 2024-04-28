@@ -77,9 +77,44 @@ const initializeStrategy = () => {
                     return done(null, false)
                 }
             }
-            
+
             // login exitoso
             // req.session.user = { id: user._id.toString(), email: user.email, age: user.age, firstName: user.firstName, lastName: user.lastName, rol: user.rol }
+            return done(null, user)
+        }
+        catch (err) {
+            done(err)
+        }
+    }))
+
+    //defino un middleware para el 'reset_password' y su estrategia asociada
+    passport.use('reset_password', new Strategy({
+        usernameField: 'email'
+    }, async (username, password, done) => {
+        try {           
+
+            if (!username || !password) {
+                // return res.status(400).json({ error: 'Credenciales inválidas!' })
+                return done(null, false)
+            }
+
+            //verifico si es el usuario "ADMIN", no se le puede cambiar la pass
+            let user
+            if (username === "adminCoder@coder.com") {
+                return done(null, false)
+            }
+            else {
+                //lo busco en la BD
+                user = await userModel.findOne({ email: username })
+                if (!user) {
+                    // return res.status(400).send('No se encontró el usuario!')
+                    return done(null, false)
+                }
+
+                await userModel.updateOne({ email: username }, { $set: { password: hashPassword(password) } })
+            }
+
+            // reset password exitoso
             return done(null, user)
         }
         catch (err) {
@@ -100,7 +135,7 @@ const initializeStrategy = () => {
         }
     })
 
-    
+
 
     // para restaurar al usuario desde la sesión, passport utiliza el valor serializado y vuelve a generar al user
     // el cual colocará en req.user para que podamos usarlo
@@ -112,7 +147,7 @@ const initializeStrategy = () => {
         } else {
             const user = await userModel.findById(id);
             done(null, user);
-        }        
+        }
     })
 
 }
