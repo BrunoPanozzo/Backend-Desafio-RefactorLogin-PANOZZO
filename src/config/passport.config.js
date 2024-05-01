@@ -1,12 +1,18 @@
 const passport = require('passport')
-const { Strategy } = require('passport-local')
+const localStrategy = require('passport-local')
+const githubStrategy  = require('passport-github2')
 const userModel = require('../dao/models/user.model')
 const { hashPassword, isValidPassword } = require('../utils/hashing')
+const { clientID, clientSecret, callbackURL } = require('./github.private')
+
+const LocalStrategy = localStrategy.Strategy
+const GithubStrategy = githubStrategy.Strategy
 
 const initializeStrategy = () => {
 
+    
     //defino un middleware para el 'register' y su estrategia asociada
-    passport.use('register', new Strategy({
+    passport.use('register', new LocalStrategy({
         passReqToCallback: true,
         usernameField: 'email'
     }, async (req, username, password, done) => {  //esta es el callback donde se especifica cómo se debe registrar un user
@@ -40,7 +46,7 @@ const initializeStrategy = () => {
     }))
 
     //defino un middleware para el 'login' y su estrategia asociada
-    passport.use('login', new Strategy({
+    passport.use('login', new LocalStrategy({
         usernameField: 'email'
     }, async (username, password, done) => {
         try {
@@ -88,7 +94,7 @@ const initializeStrategy = () => {
     }))
 
     //defino un middleware para el 'reset_password' y su estrategia asociada
-    passport.use('reset_password', new Strategy({
+    passport.use('reset_password', new LocalStrategy({
         usernameField: 'email'
     }, async (username, password, done) => {
         try {           
@@ -122,6 +128,38 @@ const initializeStrategy = () => {
         }
     }))
 
+    passport.use('github', new GithubStrategy({
+        clientID,
+        clientSecret,
+        callbackURL
+    }, async (_accessToken, _refreshToken, profile, done) => {
+        try {
+            // console.log(profile)
+
+            const user = await userModel.findOne({ email: profile._json.email })
+            if (user) {
+                return done(null, user)
+            }
+
+            // crear el usuario porque no existe
+            const fullName = profile._json.name
+            const firstName = fullName.substring(0, fullName.lastIndexOf(' '))
+            const lastName = fullName.substring(fullName.lastIndexOf(' ') + 1)
+            const newUser = {
+                firstName,
+                lastName,
+                age: 30,
+                email: profile._json.email,
+                password: ''
+            }
+            const result = await userModel.create(newUser)
+            done(null, result)
+        }
+        catch (err) {
+            done(err)
+        }
+    }))
+
     // al hacer register o login del usuario, se pasa el modelo de user al callback done
     // passport necesita serializar este modelo, para guardar una referencia al usuario en la sesión
     // simplemente se usa su id
@@ -134,8 +172,6 @@ const initializeStrategy = () => {
             done(null, user._id)
         }
     })
-
-
 
     // para restaurar al usuario desde la sesión, passport utiliza el valor serializado y vuelve a generar al user
     // el cual colocará en req.user para que podamos usarlo
