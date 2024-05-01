@@ -50,7 +50,6 @@ router.get('/github', passport.authenticate('github', { scope: ['user:email'] })
 
 router.get('/githubcallback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
     // req.session.user = { _id: req.user._id }
-
     req.session.user = {
         _id: req.user._id,
         age: req.user.age,
@@ -62,8 +61,6 @@ router.get('/githubcallback', passport.authenticate('github', { failureRedirect:
 
     // no es necesario validar el login aquí, ya lo hace passport!
     return res.redirect('/products')
-
-    res.redirect('/')
 })
 
 router.get('/logout', (req, res) => {
